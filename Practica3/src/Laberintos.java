@@ -1,4 +1,3 @@
-
 import processing.core.PApplet;
 import processing.core.PFont;
 
@@ -13,7 +12,7 @@ public class Laberintos extends PApplet {
     PFont fuente;  // Fuente para mostrar texto en pantalla
     int alto = 10;         // Altura (en celdas) de la cuadricula.
     int ancho = 10;        // Anchura (en celdas) de la cuadricula.
-    int celda = 40;          /* Tamanio de cada celda cuadrada (en 
+    int celda = 50;          /* Tamanio de cada celda cuadrada (en 
 			       pixeles). */
     ModeloLaberintos modelo;  // El objeto que representa el modelo del laberinto.
    
@@ -34,14 +33,14 @@ public class Laberintos extends PApplet {
     public void draw() {
 	for(int i = 0; i < alto; i++)
 	    for(int j = 0; j < ancho; j++){
-		if (modelo.posX == j && modelo.posY == i)
-		    fill(255, 67, 88);
-		else if (modelo.mundo[i][j].queda)
+		if(modelo.done)
 		    fill(255);
+		else if (modelo.posX == j && modelo.posY == i)
+		    fill(239, 15, 15);
 		else if(modelo.mundo[i][j].visitada)
-		    fill(255, 210, 0);
+		    fill(4, 4, 128);
 		else
-		    fill(200);
+		    fill(255);
 		rect(j*modelo.tamanio, i*modelo.tamanio, 
 		     modelo.tamanio, modelo.tamanio);
 		if (modelo.mundo[i][j].paredIzq) {
@@ -77,8 +76,7 @@ public class Laberintos extends PApplet {
 	text("Cuadricula: " + modelo.ancho + " x " + modelo.alto, 5, 
 	     (alto*celda)+12);
 	text("Generacion " + modelo.generacion, 128, (alto*celda)+12);
-	while(!modelo.pila.empty())
-	    modelo.paso();
+        modelo.paso();
     }
     
     
@@ -100,7 +98,7 @@ public class Laberintos extends PApplet {
 				    la derecha */
 	
 	/* Constructor de una Celda */
-	public Celda(int celdaX, int celdaY){
+	public Celda(int celdaY, int celdaX){
 	    this.celdaX = celdaX;
 	    this.celdaY = celdaY;
 	    this.visitada = false;
@@ -121,7 +119,8 @@ public class Laberintos extends PApplet {
 	Random rd = new Random(); /* Variable para generar numeros aleatorios */
 	Stack<Celda> pila = new Stack<>(); /* La pila de celdas (se utiliza en el algoritmo) */
 	Celda actual; /* La celda en la que estamos parados */
-
+	boolean done; /* Nos dice si ya se terminó de pintar el laberinto */
+	
 	/** Constructor del modelo
         @param ancho Cantidad de celdas a lo ancho en la cuadricula.
         @param ancho Cantidad de celdas a lo largo en la cuadricula.
@@ -139,8 +138,10 @@ public class Laberintos extends PApplet {
 		    mundo[i][j] = new Celda(i,j);
 	    posX = rd.nextInt(ancho);
 	    posY = rd.nextInt(alto);
-	    actual = pila.push(mundo[posY][posX]); /* La celda actual se mete a la pila */ 
+	    actual = mundo[posY][posX];
+	    pila.push(actual); /* La celda actual se mete a la pila */ 
 	    actual.visitada = true;
+	    done = false;
 	}
 	
 	/* Nos dice si una celda se puede mover hacia arriba */
@@ -164,68 +165,70 @@ public class Laberintos extends PApplet {
 	}
 	
 	/* Realiza un paso del algoritmo */
-	public void paso(){
+	public void paso(){     
 	    if(actual.queda){
 		int pared = rd.nextInt(4); /* Dirección en la que nos vamos a mover */
 		switch(pared){
 		case 0:
 		    if(seMueveIzq(actual)){
+			generacion++;
 			actual.paredIzq = false;
-			actual.queda = seMueveDer(actual) || seMueveArriba(actual) || seMueveAbajo(actual);
-			actual = mundo[actual.celdaY][actual.celdaX-1];
+			actual.queda = seMueveDer(actual) || seMueveArriba(actual) || seMueveAbajo(actual) || seMueveIzq(actual);
+			actual = mundo[posY][--posX];
 			actual.paredDer = false;
 			actual.visitada = true;
-			actual.queda = seMueveIzq(actual) || seMueveArriba(actual) || seMueveAbajo(actual);
-			if(actual.queda)
-			    pila.push(actual);
-		    }else
-			paso();
+			actual.queda = seMueveDer(actual) || seMueveArriba(actual) || seMueveAbajo(actual) || seMueveIzq(actual);
+			pila.push(actual);
+		    }
 		    break;
 		case 1:
 		    if(seMueveArriba(actual)){
+			generacion++;
 			actual.paredArriba = false;
-			actual.queda = seMueveDer(actual) || seMueveIzq(actual) || seMueveAbajo(actual);
-			actual = mundo[actual.celdaY-1][actual.celdaX];
+			actual.queda = seMueveDer(actual) || seMueveArriba(actual) || seMueveAbajo(actual) || seMueveIzq(actual);
+			actual = mundo[--posY][posX];
+			posY = actual.celdaY;
 			actual.paredAbajo = false;
 			actual.visitada = true;
-			actual.queda = seMueveIzq(actual) || seMueveArriba(actual) || seMueveDer(actual);
-			if(actual.queda)
-			    pila.push(actual);
-		    }else
-			paso();
+			actual.queda = seMueveDer(actual) || seMueveArriba(actual) || seMueveAbajo(actual) || seMueveIzq(actual);
+			pila.push(actual);
+		    }
 		    break;
 		case 2:
 		    if(seMueveDer(actual)){
+			generacion++;
 			actual.paredDer = false;
-			actual.queda = seMueveArriba(actual) || seMueveIzq(actual) || seMueveAbajo(actual);
-			actual = mundo[actual.celdaY][actual.celdaX+1];
+			actual.queda = seMueveDer(actual) || seMueveArriba(actual) || seMueveAbajo(actual) || seMueveIzq(actual);
+			actual = mundo[posY][++posX];
+			posX = actual.celdaX;
 			actual.paredIzq = false;
 			actual.visitada = true;
-			actual.queda = seMueveDer(actual) || seMueveArriba(actual) || seMueveAbajo(actual);
-			if(actual.queda)
-			    pila.push(actual);
-			
-		    }else
-			paso();
+			actual.queda = seMueveDer(actual) || seMueveArriba(actual) || seMueveAbajo(actual) || seMueveIzq(actual);
+			pila.push(actual);	
+		    }
 		    break;
 		case 3:
 		    if(seMueveAbajo(actual)){
+			generacion++;
 			actual.paredAbajo = false;
-			actual.queda = seMueveDer(actual) || seMueveIzq(actual) || seMueveArriba(actual);
-			actual = mundo[actual.celdaY+1][actual.celdaX];
+			actual.queda = seMueveDer(actual) || seMueveArriba(actual) || seMueveAbajo(actual) || seMueveIzq(actual);
+			actual = mundo[++posY][posX];
+			posY = actual.celdaY;
 			actual.paredArriba = false;
 			actual.visitada = true;
-			actual.queda = seMueveIzq(actual) || seMueveAbajo(actual) || seMueveDer(actual);
-			if(actual.queda)
-			    pila.push(actual);
-		    }else
-			paso();
+			actual.queda = seMueveDer(actual) || seMueveArriba(actual) || seMueveAbajo(actual) || seMueveIzq(actual);
+			pila.push(actual);
+		    }
 		    break;
 		}
+	    } else if(!pila.empty()){
+		actual = pila.pop();
+		posX = actual.celdaX;
+		posY = actual.celdaY;
+		actual.queda = seMueveDer(actual) || seMueveArriba(actual) || seMueveAbajo(actual) || seMueveIzq(actual);
+	    }else{
+		this.done = true;
 	    }
-	    else
-		if(!pila.empty())
-		    actual = pila.pop();
 	}	
     }
     
