@@ -1,6 +1,7 @@
 import processing.core.PApplet;
 import processing.core.PFont;
 
+import java.lang.Math;
 import java.util.LinkedList;
 import java.util.Hashtable;
 import java.util.PriorityQueue;
@@ -182,7 +183,8 @@ public class AEstrella extends PApplet {
             * HINT: calculen la distancia de este mosaico hacia el mosaico meta y luego multipliquenlo por 10
             * para que el valor sea significativo. tampoco deberia haber valores negativos
             */
-            hn = 1 * 10;
+	    int distancia = Math.abs(meta.columna - this.columna) + Math.abs(meta.renglon - this.renglon); /* La distancia Manhattan */ 
+            hn = distancia * 10;
         }
 
         /**
