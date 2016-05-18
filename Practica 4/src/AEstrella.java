@@ -242,6 +242,11 @@ public class AEstrella extends PApplet {
         }
     }
 
+    /* Calcula la distancia del padre al mosaico actual */
+    private int calculaDistanciaPadre(){
+	return 0;
+    }
+
     // --- Clase Mapa
     class Mapa {
         int columnas, renglones;
@@ -317,14 +322,14 @@ public class AEstrella extends PApplet {
             resuelto = false;
             this.estadoFinal = estadoFinal;
             // aqui deben incializar sus listas abierta y cerrada
-            // listaAbierta = new PriorityQueue();
-            // listaCerrada = new Hashtable();
+            listaAbierta = new PriorityQueue();
+            listaCerrada = new Hashtable();
             estadoInicial.calculaHeuristica(estadoFinal);
             estadoInicial.tipo = Tipo.ESTADO_INICIAL;
             estadoFinal.tipo = Tipo.ESTADO_FINAL;
 
             nodoPrevio = new NodoBusqueda(estadoInicial);
-            // listaAbierta.offer(nodoPrevio);
+            listaAbierta.offer(nodoPrevio);
         }
 
         void expandeNodoSiguiente() {
@@ -337,6 +342,38 @@ public class AEstrella extends PApplet {
               * nodo final, si no lo es hay que generar sus sucesores, verificar en que lista se encuentra y tomar
               * la accion correspondiente.
               */
+	    if(resuelto) 
+		return; /* Si está resuelto, salimos del método */
+	    nodoActual = listaAbierta.poll(); /* Sacamos al primer elemento de la lista abierta
+					       * En este caso también es el único. */
+
+	    /* Metemos a ese nodo a la lista cerrada */
+	    listaCerrada.put(nodoActual.estado, nodoActual.estado /* No sé qué chingados va aquí */); 
+	    nodoActual.estado.situacion = Situacion.EN_LISTA_CERRADA; /* Se cambia la situación del nodo actual */
+	    if(nodoActual.estado.equals(estadoFinal)){
+		resuelto = true;
+		// Cambiar situación familiar (?) 
+	    }
+	    LinkedList<NodoBusqueda> sucesores = nodoActual.getSucesores(); /* Se genera a los sucesores del nodo */
+	    for(NodoBusqueda sucesor : sucesores){
+		if(sucesor.estado.tipo == Tipo.OBSTACULO)
+		    continue; /* Si el mosaico es un obstáculo, lo ignoramos */
+		else if(listaCerrada.contains(sucesor))
+		    continue; /* Así mismo, si el nodo ya está en la lista cerrada, se ignora */
+		else{
+		    /* Si no está en la lista abierta, se añade a esta */
+		    if(!listaAbierta.contains(sucesor)){
+			sucesor.padre = nodoActual;
+			sucesor.estado.padre = nodoActual.estado;
+			int distanciaPadre = calculaDistanciaPadre(sucesor.estado); /* La distancia desde el padre hasta el sucesor */
+			sucesor.estado.gn = nodoActual.gn + distanciaPadre;
+			sucesor.estado.calculaHeuristica(estadoFinal);
+
+		    }
+		}
+		   
+		
+	    }
         }
     }
 
