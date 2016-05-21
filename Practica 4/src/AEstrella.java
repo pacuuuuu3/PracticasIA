@@ -243,7 +243,7 @@ public class AEstrella extends PApplet {
     }
 
     /* Calcula la distancia del padre al mosaico actual */
-    private int calculaDistanciaPadre(){
+    private int calculaDistanciaPadre(Mosaico padre){
 	return 0;
     }
 
@@ -346,13 +346,18 @@ public class AEstrella extends PApplet {
 		return; /* Si está resuelto, salimos del método */
 	    nodoActual = listaAbierta.poll(); /* Sacamos al primer elemento de la lista abierta
 					       * En este caso también es el único. */
-
 	    /* Metemos a ese nodo a la lista cerrada */
 	    listaCerrada.put(nodoActual.estado, nodoActual.estado /* No sé qué chingados va aquí */); 
 	    nodoActual.estado.situacion = Situacion.EN_LISTA_CERRADA; /* Se cambia la situación del nodo actual */
 	    if(nodoActual.estado.equals(estadoFinal)){
 		resuelto = true;
-		// Cambiar situación familiar (?) 
+		nodoActual.estado.situacion = EN_SOLUCION;
+		/* Cambiar situación familiar */
+		while(nodoActual.estado.tipo != Tipo.ESTADO_INICIAL){
+		    /* Cambiamos de nodo actual y actualizamos situación */
+		    nodoActual = nodoActual.padre;
+		    nodoActual.estado.situacion = Situacion.EN_SOLUCION; /* Aquí se actualiza la situación */
+		}
 	    }
 	    LinkedList<NodoBusqueda> sucesores = nodoActual.getSucesores(); /* Se genera a los sucesores del nodo */
 	    for(NodoBusqueda sucesor : sucesores){
@@ -365,14 +370,16 @@ public class AEstrella extends PApplet {
 		    if(!listaAbierta.contains(sucesor)){
 			sucesor.padre = nodoActual;
 			sucesor.estado.padre = nodoActual.estado;
-			int distanciaPadre = calculaDistanciaPadre(sucesor.estado); /* La distancia desde el padre hasta el sucesor */
+			int distanciaPadre = nodoActual.estado.calculaDistanciaPadre(nodoActual.estado.padre); /* La distancia desde el padre hasta el sucesor */
 			sucesor.estado.gn = nodoActual.gn + distanciaPadre;
 			sucesor.estado.calculaHeuristica(estadoFinal);
-
+			sucesor.estado.situacion = Situacion.EN_LISTA_ABIERTA;
+			listaAbierta.offer(sucesor);
+		    }else{
+			/* Si ya está en la lista abierta, debemos ver si es necesario actualizarlo... */
+			int nuevaGn = sucesor.estado.calculaDistanciaPadre(
 		    }
 		}
-		   
-		
 	    }
         }
     }
