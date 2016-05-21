@@ -244,10 +244,11 @@ public class AEstrella extends PApplet {
 
     /* Calcula la distancia del padre al mosaico actual (sólo funciona con nodos adyacentes)*/
     private int calculaDistanciaPadre(Mosaico padre, Mosaico hijo){
-	System.out.println(padre); /* Da null :v */
-	if(Math.abs(padre.renglon - hijo.renglon) + Math.abs(padre.columna - hijo.columna) > 1)
-	    return 14;
-	return 10;
+	if(padre == null)
+	    return 0; /* Si el padre es nulo, el nodo es el inciial (o algo así) */
+	if((Math.abs(padre.renglon - hijo.renglon) + Math.abs(padre.columna - hijo.columna)) == 1)
+	    return 10;
+	return 14;
     }
 
     // --- Clase Mapa
@@ -373,21 +374,23 @@ public class AEstrella extends PApplet {
 		    if(!listaAbierta.contains(sucesor)){
 			sucesor.padre = nodoActual;
 			sucesor.estado.padre = nodoActual.estado;
-			int distanciaPadre = calculaDistanciaPadre(nodoActual.estado.padre, nodoActual.estado); /* La distancia 
-														   desde el padre 
-														   hasta el 
-														   sucesor */
+			int distanciaPadre = calculaDistanciaPadre(nodoActual.estado, sucesor.estado); /* La distancia 
+													  desde el padre 
+													  hasta el 
+													  sucesor */
+			sucesor.gn = nodoActual.gn + distanciaPadre;
 			sucesor.estado.gn = nodoActual.gn + distanciaPadre;
 			sucesor.estado.calculaHeuristica(estadoFinal);
 			sucesor.estado.situacion = Situacion.EN_LISTA_ABIERTA;
 			listaAbierta.offer(sucesor);
 		    }else{
 			/* Si ya está en la lista abierta, debemos ver si es necesario actualizarlo... */
-			int nuevaGn = calculaDistanciaPadre(nodoActual.estado, sucesor.estado); /* La distancia del actual al sucesor */
-			if(nuevaGn < sucesor.estado.gn){
+			int nuevaGn = calculaDistanciaPadre(nodoActual.estado, sucesor.estado) + nodoActual.gn; /* La distancia del actual al sucesor */
+			if(nuevaGn < sucesor.gn){
 			    listaAbierta.remove(sucesor); /* Se elimina para poder insertarlo de nuevo y  
 							     que la cola sí saque el nodo de menor prioridad */
 			    /* Hace falta actualizar */
+			    sucesor.gn = nuevaGn;
 			    sucesor.estado.gn = nuevaGn;
 			    sucesor.padre = nodoActual;
 			    sucesor.estado.padre = nodoActual.estado;
