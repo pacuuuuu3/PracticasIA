@@ -175,14 +175,14 @@ public class AEstrella extends PApplet {
         int fn() {
             return gn + hn;
         }
-
+	
         /** Calcula la distancia Manhattan a la meta. */
-        void calculaHeuristica(Mosaico meta){
+        void calculaHeuristica(Mosaico meta){ 
             /**
-            * IMPLEMENTACION
-            * HINT: calculen la distancia de este mosaico hacia el mosaico meta y luego multipliquenlo por 10
-            * para que el valor sea significativo. tampoco deberia haber valores negativos
-            */
+	     * IMPLEMENTACION
+	     * HINT: calculen la distancia de este mosaico hacia el mosaico meta y luego multipliquenlo por 10
+	     * para que el valor sea significativo. tampoco deberia haber valores negativos
+	     */
 	    int distancia = Math.abs(meta.columna - this.columna) + Math.abs(meta.renglon - this.renglon); /* La distancia Manhattan */ 
             hn = distancia * 10;
         }
@@ -242,9 +242,12 @@ public class AEstrella extends PApplet {
         }
     }
 
-    /* Calcula la distancia del padre al mosaico actual */
-    private int calculaDistanciaPadre(Mosaico padre){
-	return 0;
+    /* Calcula la distancia del padre al mosaico actual (sólo funciona con nodos adyacentes)*/
+    private int calculaDistanciaPadre(Mosaico padre, Mosaico hijo){
+	System.out.println(padre); /* Da null :v */
+	if(Math.abs(padre.renglon - hijo.renglon) + Math.abs(padre.columna - hijo.columna) > 1)
+	    return 14;
+	return 10;
     }
 
     // --- Clase Mapa
@@ -351,7 +354,7 @@ public class AEstrella extends PApplet {
 	    nodoActual.estado.situacion = Situacion.EN_LISTA_CERRADA; /* Se cambia la situación del nodo actual */
 	    if(nodoActual.estado.equals(estadoFinal)){
 		resuelto = true;
-		nodoActual.estado.situacion = EN_SOLUCION;
+		nodoActual.estado.situacion = Situacion.EN_SOLUCION;
 		/* Cambiar situación familiar */
 		while(nodoActual.estado.tipo != Tipo.ESTADO_INICIAL){
 		    /* Cambiamos de nodo actual y actualizamos situación */
@@ -370,14 +373,27 @@ public class AEstrella extends PApplet {
 		    if(!listaAbierta.contains(sucesor)){
 			sucesor.padre = nodoActual;
 			sucesor.estado.padre = nodoActual.estado;
-			int distanciaPadre = nodoActual.estado.calculaDistanciaPadre(nodoActual.estado.padre); /* La distancia desde el padre hasta el sucesor */
+			int distanciaPadre = calculaDistanciaPadre(nodoActual.estado.padre, nodoActual.estado); /* La distancia 
+														   desde el padre 
+														   hasta el 
+														   sucesor */
 			sucesor.estado.gn = nodoActual.gn + distanciaPadre;
 			sucesor.estado.calculaHeuristica(estadoFinal);
 			sucesor.estado.situacion = Situacion.EN_LISTA_ABIERTA;
 			listaAbierta.offer(sucesor);
 		    }else{
 			/* Si ya está en la lista abierta, debemos ver si es necesario actualizarlo... */
-			int nuevaGn = sucesor.estado.calculaDistanciaPadre(
+			int nuevaGn = calculaDistanciaPadre(nodoActual.estado, sucesor.estado); /* La distancia del actual al sucesor */
+			if(nuevaGn < sucesor.estado.gn){
+			    listaAbierta.remove(sucesor); /* Se elimina para poder insertarlo de nuevo y  
+							     que la cola sí saque el nodo de menor prioridad */
+			    /* Hace falta actualizar */
+			    sucesor.estado.gn = nuevaGn;
+			    sucesor.padre = nodoActual;
+			    sucesor.estado.padre = nodoActual.estado;
+			    sucesor.estado.calculaHeuristica(estadoFinal);
+			    listaAbierta.offer(sucesor);
+			}
 		    }
 		}
 	    }
