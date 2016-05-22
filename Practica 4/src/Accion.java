@@ -8,4 +8,3 @@ public enum Accion {
     }
     int costo() { return costo; }
 }
-

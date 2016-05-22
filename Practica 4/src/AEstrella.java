@@ -104,7 +104,7 @@ public class AEstrella extends PApplet {
                         text("f(n)=" + m.fn(), j*tamanioMosaico+4, i*tamanioMosaico + 15);
                         text("g(n)=" + m.gn, j*tamanioMosaico+4, (i+1)*tamanioMosaico - 20);
                         text("h(n)=" + m.hn, j*tamanioMosaico+4, (i+1)*tamanioMosaico - 4);
-                        ellipse((float)((0.5 + j) * tamanioMosaico), (float)((0.5 + i) * tamanioMosaico), (float)10, (float)10);
+			      ellipse((float)((0.5 + j) * tamanioMosaico), (float)((0.5 + i) * tamanioMosaico), (float)10, (float)10);
                         line((float)((0.5 + j) * tamanioMosaico), (float)((0.5 + i) * tamanioMosaico),
                            (float)((0.5 + j) * tamanioMosaico + (m.padre.columna - m.columna) * 20),
                            (float)((0.5 + i) * tamanioMosaico + (m.padre.renglon - m.renglon) * 20));
@@ -244,7 +244,7 @@ public class AEstrella extends PApplet {
 
     /* Calcula la distancia del padre al mosaico actual (sólo funciona con nodos adyacentes)*/
     private int calculaDistanciaPadre(Mosaico padre, Mosaico hijo){
-	if(padre == null)
+	if(padre == null || hijo == null)
 	    return 0; /* Si el padre es nulo, el nodo es el inciial (o algo así) */
 	if((Math.abs(padre.renglon - hijo.renglon) + Math.abs(padre.columna - hijo.columna)) == 1)
 	    return 10;
@@ -292,9 +292,7 @@ public class AEstrella extends PApplet {
                 sucesor = estado.aplicaAccion(a);
                 if(sucesor != null) {
                     nodoSucesor = new NodoBusqueda(sucesor);
-                    nodoSucesor.gn = this.gn + a.costo();
-                    nodoSucesor.padre = this;
-                    nodoSucesor.accionPadre = a;
+		    /* Aquí había algo que arruinaba todo */
                     sucesores.add(nodoSucesor);
                 }
             }
@@ -327,7 +325,7 @@ public class AEstrella extends PApplet {
             this.estadoFinal = estadoFinal;
             // aqui deben incializar sus listas abierta y cerrada
             listaAbierta = new PriorityQueue();
-            listaCerrada = new Hashtable();
+            listaCerrada = new Hashtable<>();
             estadoInicial.calculaHeuristica(estadoFinal);
             estadoInicial.tipo = Tipo.ESTADO_INICIAL;
             estadoFinal.tipo = Tipo.ESTADO_FINAL;
@@ -348,8 +346,7 @@ public class AEstrella extends PApplet {
               */
 	    if(resuelto) 
 		return; /* Si está resuelto, salimos del método */
-	    nodoActual = listaAbierta.poll(); /* Sacamos al primer elemento de la lista abierta
-					       * En este caso también es el único. */
+	    nodoActual = listaAbierta.poll(); /* Sacamos al primer elemento de la lista abierta */ 					       
 	    /* Metemos a ese nodo a la lista cerrada */
 	    listaCerrada.put(nodoActual.estado, nodoActual.estado /* No sé qué chingados va aquí */); 
 	    nodoActual.estado.situacion = Situacion.EN_LISTA_CERRADA; /* Se cambia la situación del nodo actual */
@@ -367,9 +364,9 @@ public class AEstrella extends PApplet {
 	    for(NodoBusqueda sucesor : sucesores){
 		if(sucesor.estado.tipo == Tipo.OBSTACULO)
 		    continue; /* Si el mosaico es un obstáculo, lo ignoramos */
-		else if(listaCerrada.contains(sucesor))
+		else if(listaCerrada.contains(sucesor.estado)){
 		    continue; /* Así mismo, si el nodo ya está en la lista cerrada, se ignora */
-		else{
+		}else{
 		    /* Si no está en la lista abierta, se añade a esta */
 		    if(!listaAbierta.contains(sucesor)){
 			sucesor.padre = nodoActual;
