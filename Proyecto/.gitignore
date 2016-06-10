@@ -1,0 +1,6 @@
+.gitignore_global
+build/*
+build.xml
+Proyecto.pdf
+*~
+.*
