@@ -17,9 +17,7 @@ public class Celda{
     
     /* Constructor. Define el número de direcciones como 8 */
     public Celda(){
-	this.tipo = TipoCelda.PROBABILIDAD_ALTA;
-	distanciaObstaculo = new int[8];
-	this.creencia = 0;
+	this.tipo = TipoCelda.PROBABILIDAD_MEDIA;
     }
 
     /* Regresa el tipo de la Celda */
@@ -40,6 +38,13 @@ public class Celda{
     /* Asigna a la creencia como 'creencia' */
     public void setCreencia(double creencia){
 	this.creencia = creencia;
+	/* Se cambia el tipo de la Celda de acuerdo a la creencia */
+	if(this.creencia <= 0.25)
+	    this.tipo = TipoCelda.PROBABILIDAD_BAJA;
+	else if(this.creencia <= 0.75)
+	    this.tipo = TipoCelda.PROBABILIDAD_MEDIA;
+	else
+	    this.tipo = TipoCelda.PROBABILIDAD_ALTA;
     }
 
     /* Regresa el arreglo de las distancias a los obstáculos en todas las

@@ -7,13 +7,13 @@ import processing.core.PFont;
 public class DibujanteRobot extends PApplet{ /* La extensión se agrega para usar Processing */
     PFont fuente; /* Fuente para mostrar texto en pantalla */
     int tamanioMosaico = 60; /* Tamaño de cada mosaico en pixeles */
-    int y = 21; /* Número de columnas del mundo */
-    int x = 10; /* Número de renglones del mundo */
+    int y = 10; /* Número de renglones del mundo */
+    int x = 21; /* Número de columnas del mundo */
     Celda mundo[][]; /* El mundo en sí (?)*/
     
     /* Configura el mundo */
     public void settings() {
-        size(y * tamanioMosaico, x * tamanioMosaico + 70); /* No le entiendo muy bien por el momento y tengo que modificarlo */ 
+        size(x * tamanioMosaico, y * tamanioMosaico + 70); /* No le entiendo muy bien por el momento y tengo que modificarlo */ 
     }
     
     @Override
@@ -61,34 +61,34 @@ public class DibujanteRobot extends PApplet{ /* La extensión se agrega para usa
 		    stroke(0); 
 		    fill(0);
                 }
-		rect(j*tamanioMosaico, i*tamanioMosaico, tamanioMosaico, tamanioMosaico); /* Dibujamos el rectángulo (?) */
+		rect(i*tamanioMosaico, j*tamanioMosaico, tamanioMosaico, tamanioMosaico); /* Dibujamos el rectángulo (?) */
 		
 		/* Aquí escribimos la probabilidad */
 		fill(0);
-		text("P=" + actual.getCreencia(), j*tamanioMosaico+4, (i+1)*tamanioMosaico - 4);
+		text("P=" + actual.getCreencia(), i*tamanioMosaico+4, (j+1)*tamanioMosaico - 4);
 		
 	    }
 	}
 
 	fill(128,128,128);
-        rect(10, x * tamanioMosaico + 10, 20, 20);
+        rect(10, y * tamanioMosaico + 10, 20, 20);
         fill(0);
-        text("Obstáculo", 40, x * tamanioMosaico + 30);
+        text("Obstáculo", 40, y * tamanioMosaico + 30);
 	
 	fill(0,255,0);
-        rect(10, x * tamanioMosaico + 30, 20, 20);
+        rect(10, y * tamanioMosaico + 30, 20, 20);
         fill(0);
-        text("Probabilidad alta", 40, x * tamanioMosaico + 50);
+        text("Probabilidad alta", 40, y * tamanioMosaico + 50);
 
 	fill(255,255,0);
-        rect(2 * tamanioMosaico + 30, x * tamanioMosaico + 10, 20, 20);
+        rect(2 * tamanioMosaico + 30, y * tamanioMosaico + 10, 20, 20);
         fill(0);
-        text("Probabilidad media", 2 * tamanioMosaico + 60, x * tamanioMosaico + 30);
+        text("Probabilidad media", 2 * tamanioMosaico + 60, y * tamanioMosaico + 30);
 
 	fill(220,20,60);
-        rect(2 * tamanioMosaico + 30, x * tamanioMosaico + 30, 20, 20);
+        rect(2 * tamanioMosaico + 30, y * tamanioMosaico + 30, 20, 20);
         fill(0);
-        text("Probabilidad baja", 2 * tamanioMosaico + 60, x * tamanioMosaico + 50);
+        text("Probabilidad baja", 2 * tamanioMosaico + 60, y * tamanioMosaico + 50);
     }   
 
     /* Dibuja el mundo */
