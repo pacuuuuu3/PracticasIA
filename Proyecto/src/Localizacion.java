@@ -40,7 +40,7 @@ public class Localizacion extends PApplet{ /* La extensión se agrega para usar 
         for(int i = 0; i < x; i++){
             for(int j = 0; j < y; j++){
                 actual = mundo[i][j];
-                switch(actual.getTipo()) {
+		switch(actual.getTipo()) {
 		case OBSTACULO:
 		    stroke(0); 
 		    fill(128, 128, 128); 
@@ -62,26 +62,29 @@ public class Localizacion extends PApplet{ /* La extensión se agrega para usar 
 		    fill(0);
                 }
 		rect(j*tamanioMosaico, i*tamanioMosaico, tamanioMosaico, tamanioMosaico); /* Dibujamos el rectángulo (?) */
+		fill(0);
+		text("P=" + actual.getCreencia(), j*tamanioMosaico+4, (i+1)*tamanioMosaico - 4);
 	    }
 	}
+
 	fill(128,128,128);
         rect(10, x * tamanioMosaico + 10, 20, 20);
-        fill(255);
+        fill(0);
         text("Obstáculo", 40, x * tamanioMosaico + 30);
 	
 	fill(0,255,0);
         rect(10, x * tamanioMosaico + 30, 20, 20);
-        fill(255);
+        fill(0);
         text("Probabilidad alta", 40, x * tamanioMosaico + 50);
 
 	fill(255,255,0);
         rect(2 * tamanioMosaico + 30, x * tamanioMosaico + 10, 20, 20);
-        fill(255);
+        fill(0);
         text("Probabilidad media", 2 * tamanioMosaico + 60, x * tamanioMosaico + 30);
-	
-	        fill(220,20,60);
+
+	fill(220,20,60);
         rect(2 * tamanioMosaico + 30, x * tamanioMosaico + 30, 20, 20);
-        fill(255);
+        fill(0);
         text("Probabilidad baja", 2 * tamanioMosaico + 60, x * tamanioMosaico + 50);
     }   
 

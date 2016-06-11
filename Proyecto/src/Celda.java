@@ -17,8 +17,9 @@ public class Celda{
     
     /* Constructor. Define el número de direcciones como 8 */
     public Celda(){
-	this.tipo = TipoCelda.OBSTACULO;
+	this.tipo = TipoCelda.PROBABILIDAD_ALTA;
 	distanciaObstaculo = new int[8];
+	this.creencia = 0;
     }
 
     /* Regresa el tipo de la Celda */
@@ -49,7 +50,7 @@ public class Celda{
     
     /* Pone el arreglo de distancias como 'nuevasDistancias' */
     public void setDistanciaObstaculo(int[] nuevasDistancias){
-	thiis.distanciaObstaculo = nuevasDistancias;
+	this.distanciaObstaculo = nuevasDistancias;
     }
     
 }
