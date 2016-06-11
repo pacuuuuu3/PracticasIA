@@ -4,7 +4,7 @@
 import processing.core.PApplet;
 import processing.core.PFont;
 
-public class Localizacion extends PApplet{ /* La extensión se agrega para usar Processing */
+public class DibujanteRobot extends PApplet{ /* La extensión se agrega para usar Processing */
     PFont fuente; /* Fuente para mostrar texto en pantalla */
     int tamanioMosaico = 60; /* Tamaño de cada mosaico en pixeles */
     int y = 21; /* Número de columnas del mundo */
@@ -62,8 +62,11 @@ public class Localizacion extends PApplet{ /* La extensión se agrega para usar 
 		    fill(0);
                 }
 		rect(j*tamanioMosaico, i*tamanioMosaico, tamanioMosaico, tamanioMosaico); /* Dibujamos el rectángulo (?) */
+		
+		/* Aquí escribimos la probabilidad */
 		fill(0);
 		text("P=" + actual.getCreencia(), j*tamanioMosaico+4, (i+1)*tamanioMosaico - 4);
+		
 	    }
 	}
 
@@ -90,7 +93,7 @@ public class Localizacion extends PApplet{ /* La extensión se agrega para usar 
 
     /* Dibuja el mundo */
     public static void main(String args[]) {
-	PApplet.main(new String[] { "Localizacion" });
+	PApplet.main(new String[] { "DibujanteRobot" });
     
     }
 
