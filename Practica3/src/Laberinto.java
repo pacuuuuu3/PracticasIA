@@ -7,7 +7,7 @@ import java.lang.Math;
 import java.util.Stack;
 
 /* Clase para recorrido de laberintos */
-public class Laberintos extends PApplet {
+public class Laberinto extends PApplet {
 
     PFont fuente;  // Fuente para mostrar texto en pantalla
     int alto = 10;         // Altura (en celdas) de la cuadricula.
@@ -233,7 +233,7 @@ public class Laberintos extends PApplet {
     }
     
     static public void main(String args[]) {
-        PApplet.main(new String[] { "Laberintos" });
+        PApplet.main(new String[] { "Laberinto" });
     }
 }
  

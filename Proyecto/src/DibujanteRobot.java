@@ -89,7 +89,10 @@ public class DibujanteRobot extends PApplet{ /* La extensión se agrega para usa
         rect(2 * tamanioMosaico + 30, y * tamanioMosaico + 30, 20, 20);
         fill(0);
         text("Probabilidad baja", 2 * tamanioMosaico + 60, y * tamanioMosaico + 50);
-    }   
+    }
+
+    
+    
 
     /* Dibuja el mundo */
     public static void main(String args[]) {

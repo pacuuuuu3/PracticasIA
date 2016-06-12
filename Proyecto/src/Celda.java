@@ -47,10 +47,9 @@ public class Celda{
 	    this.tipo = TipoCelda.PROBABILIDAD_ALTA;
     }
 
-    /* Regresa el arreglo de las distancias a los obstáculos en todas las
-       direcciones */
-    public int[] getDistanciaObstaculo(){
-	return this.distanciaObstaculo;
+    /* Regresa la distancia al obstáculo más cercano en la dirección dada */
+    public int getDistanciaObstaculo(int direccion){
+	return this.distanciaObstaculo[direccion];
     }
     
     /* Pone el arreglo de distancias como 'nuevasDistancias' */
