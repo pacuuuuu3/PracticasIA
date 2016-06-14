@@ -11,7 +11,14 @@ public class Reinas{
     private int generacionOptima; /* Entero que nos dice en qué generación se 
 				     encontró la solución óptima */
     
-    /* Crea una nueva instancia del algoritmo genético */
+    /**
+     * Crea una nueva instancia del algoritmo genético.
+     * @param tamanoPoblacion - Tamaño de la población.
+     * @param tamanoTablero - Tamaño del lado del tablero.
+     * @param generaciones - Número máximo de generaciones para correr el 
+     algoritmo.
+     * @param elite - Número de elite que queremos. 
+     * @param mutacion - Probabilidad de mutación. */
     public Reinas(int tamanoPoblacion, int tamanoTablero, int generaciones,
 		  int elite, double mutacion){
 	this.tamanoPoblacion = tamanoPoblacion;
@@ -57,7 +64,7 @@ public class Reinas{
 	    System.out.println("Mejor solución en iteración " + i + " es: " 
 			      + mejor);
 	}
-	Reinas prueba = new Reinas(50, 8, Integer.MAX_VALUE, 1, 0.2);
+	Reinas prueba = new Reinas(50, 16, Integer.MAX_VALUE, 1, 0.2);
 	Tablero mejor = prueba.mejorIndividuo();
 	System.out.println("Se encontró la solución óptima en la " + 
 			   "generación: " + prueba.generacionOptima);
