@@ -64,7 +64,7 @@ public class Reinas{
 	    System.out.println("Mejor solución en iteración " + i + " es: " 
 			      + mejor);
 	}
-	Reinas prueba = new Reinas(50, 16, Integer.MAX_VALUE, 1, 0.2);
+	Reinas prueba = new Reinas(50, 8, Integer.MAX_VALUE, 1, 0.2);
 	Tablero mejor = prueba.mejorIndividuo();
 	System.out.println("Se encontró la solución óptima en la " + 
 			   "generación: " + prueba.generacionOptima);
