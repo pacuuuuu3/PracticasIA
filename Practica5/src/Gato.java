@@ -36,7 +36,7 @@ public class Gato{
     }
 
     /* Crea un gato dada una cuadrícula válida y un booleano para 
-       representar al turno (optimización del constructo anterior) */
+       representar al turno (optimización del constructor anterior) */
     public Gato(int[][] cuadricula, boolean turno){
 	this.cuadricula = cuadricula;
 	this.turno = turno;
