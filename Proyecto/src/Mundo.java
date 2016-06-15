@@ -1,5 +1,7 @@
 /* Clase que representa al mundo en el que se moverá el Robot */
-public class Mundo implements Iterable<Celda>{
+import java.util.ArrayList;
+
+public class Mundo{
     private Celda[][] arreglo; /* Arreglo de Celdas que se usa como 
 				  representación del Mundo */
     
@@ -9,12 +11,14 @@ public class Mundo implements Iterable<Celda>{
 	for(int i = 0; i < arreglo.length; ++i){
 	    for(int j = 0; j < arreglo[0].length; ++j){
 		Celda c = arreglo[i][j]; /* La Celda actual */
+		c.setPosX(i);
+		c.setPosY(j);
 		if(c.getTipo() != TipoCelda.OBSTACULO){ /* Se llena su 
 							   arreglo de 
 							   distancias a 
 							   obstáculos */
-		    int distancias = new int[8]; /* Distancias a los 
-						    obstáculos */
+		    int[] distancias = new int[8]; /* Distancias a los 
+						      obstáculos */
 		    distancias[Celda.N] = distanciaNorte(i, j);
 		    distancias[Celda.S] = distanciaSur(i, j);
 		    distancias[Celda.E] = distanciaEste(i, j);
@@ -36,6 +40,8 @@ public class Mundo implements Iterable<Celda>{
     
     /* Modifica la Celda con posición (i, j) */
     public void setPosicion(Celda nueva, int i, int j){
+	nueva.setPosX(i);
+	nueva.setPosY(j);
 	this.arreglo[i][j] = nueva;
     }
     
@@ -58,14 +64,7 @@ public class Mundo implements Iterable<Celda>{
 		    posiciones++;
 	return posiciones;
     }
-    
-    /* Regresa el arreglo de Celdas.
-       No quería hacerlo pero necesito iterar sobre él y no quiero implementar
-       Iterable */
-    public Celda[][] getArreglo(){
-	return this.arreglo;
-    }
-
+   
      /* Calcula la distancia al obstáculo más cercano en dirección norte para 
        la Celda con posición (i, j).
        Lo que regresa se multiplica por 10 para simplificar distancias */
@@ -79,7 +78,7 @@ public class Mundo implements Iterable<Celda>{
     }
 
     /* Calcula la distancia al obstáculo más cercano en dirección sur para 
-       la Celda con poscición (i, j) */
+       la Celda con posición (i, j) */
     public int distanciaSur(int i, int j){
 	int jOriginal = j; /* Guardamos la posición en j original para hacer 
 			      una resta al final */
@@ -90,7 +89,7 @@ public class Mundo implements Iterable<Celda>{
     }
 
     /* Calcula la distancia al obstáculo más cercano en dirección este para 
-       la Celda con poscición (i, j) */
+       la Celda con posición (i, j) */
     public int distanciaEste(int i, int j){
 	int iOriginal = i; /* Guardamos la posición en i original para hacer 
 			      una resta al final */
@@ -102,7 +101,7 @@ public class Mundo implements Iterable<Celda>{
 
     
     /* Calcula la distancia al obstáculo más cercano en dirección oeste para 
-       la Celda con poscición (i, j) */
+       la Celda con posición (i, j) */
     public int distanciaOeste(int i, int j){
 	int iOriginal = i; /* Guardamos la posición en i original para hacer 
 			      una resta al final */
@@ -113,7 +112,7 @@ public class Mundo implements Iterable<Celda>{
     }
 
     /* Calcula la distancia al obstáculo más cercano en dirección noroeste para 
-       la Celda con poscición (i, j). 
+       la Celda con posición (i, j). 
        Se multiplica por 14, la aproximación a una unidad de distancia en 
        diagonal. */
     public int distanciaNoroeste(int i, int j){
@@ -132,7 +131,7 @@ public class Mundo implements Iterable<Celda>{
     }
 
     /* Calcula la distancia al obstáculo más cercano en dirección noreste para 
-       la Celda con poscición (i, j). */ 
+       la Celda con posición (i, j). */ 
     public int distanciaNoreste(int i, int j){
 	int iOriginal = i; /* Guardamos la posición en i original para hacer 
 			      una resta al final */
@@ -149,7 +148,7 @@ public class Mundo implements Iterable<Celda>{
     }
 
     /* Calcula la distancia al obstáculo más cercano en dirección sureste para 
-       la Celda con poscición (i, j). */ 
+       la Celda con posición (i, j). */ 
     public int distanciaSureste(int i, int j){
 	int iOriginal = i; /* Guardamos la posición en i original para hacer 
 			      una resta al final */
@@ -166,7 +165,7 @@ public class Mundo implements Iterable<Celda>{
     }
 
     /* Calcula la distancia al obstáculo más cercano en dirección noroeste 
-       para la Celda con poscición (i, j). */
+       para la Celda con posición (i, j). */
     public int distanciaSuroeste(int i, int j){
 	int iOriginal = i; /* Guardamos la posición en i original para hacer 
 			      una resta al final */
@@ -181,4 +180,17 @@ public class Mundo implements Iterable<Celda>{
 	}
 	return 14*(iOriginal - i);
     }   
+    
+    /* Regresa un ArrayList con los elementos del Mundo */
+    public ArrayList<Celda> toArrayList(){
+	ArrayList<Celda> regreso = new ArrayList<>(); /* Lista a regresar */
+	for(Celda[] columna: arreglo)
+	    for(Celda lugar: columna)
+		if(lugar.getTipo() != TipoCelda.OBSTACULO) /* No quiero 
+							      agregar 
+							      obstáculos */
+		    regreso.add(lugar);
+	return regreso;
+    }
+    
 }

@@ -1,4 +1,7 @@
 /* Clase que representa al robot del algoritmo de localización de Markov */
+import java.util.ArrayList;
+import java.util.Collections;
+
 public class Robot{
     private int sT; /* La lectura del láser del Robot. */
     private int thetaT; /* La lectura del giro del Robot */
@@ -16,17 +19,8 @@ public class Robot{
 	this.x = x;
 	this.y = y;
 	this.theta = theta;
-	this.mundo = mundo;
+	this.mundo = mundo;	
 	this.celda = mundo.getPosicion(x, y);
-    }
-    
-    /**
-     * Corre el algoritmo de localización de Markov.
-     * @param sigmaSquared - Varianza de la distribución normal.
-     * @param sigmaTheta - Ruido del sensor de giro.
-     * @param s - Porcentaje de ruido de la lectura del odómetro.
-     */
-    public void Markov(double sigmaSquared, double sigmaTheta, double s){
 	int posiciones = mundo.posiciones(); /* Número de Celdas que no son 
 						obstáculos en el Mundo */
 	/* Primera parte del algoritmo.
@@ -42,135 +36,151 @@ public class Robot{
 	    }
 	}
 	/* Segunda parte.
-	 Toca determinar distancias a obstáculos.
-	 Esto se hace desde el constructor del mundo y no será necesario.*/
+	   Toca determinar distancias a obstáculos.
+	   Esto se hace desde el constructor del mundo y no será necesario.*/
+    }	    
+    
+    /* Normaliza la creencia de todas las Celdas */
+    public void normaliza(){
+	double suma = 0.0; /* Suma de todas todas las probabilidades */
+	for(int i = 0; i < mundo.getAncho(); ++i)
+	    for(int j = 0; j < mundo.getAlto(); ++j)
+		if(mundo.getPosicion(i, j).getTipo() != TipoCelda.OBSTACULO)
+		    suma += mundo.getPosicion(i, j).getCreencia();
+	for(int i = 0; i < mundo.getAncho(); ++i){
+	    for(int j = 0; j < mundo.getAlto(); ++j){
+		Celda actual = mundo.getPosicion(i, j); /* La celda actual */
+		if(actual.getTipo() != TipoCelda.OBSTACULO){
+		    actual.setCreencia(actual.getCreencia() / suma); 
+		    mundo.setPosicion(actual, i, j);
+		}
+	    }
+	}
+    }
+
+     /* Asigna tipos a las Celdas para dibujarlas */
+    public void cambiaTipos(){
+	int total = mundo.getAncho()*mundo.getAlto(); /* El total de Celdas */
+	ArrayList<Celda> a = mundo.toArrayList(); /* El mundo representado 
+						     como ArrayList */
+	Collections.sort(a);
+	int contador = 0; /* Contador */
+	for(Celda c: a){
+	    if(contador <= total/3.0)
+		c.setTipo(TipoCelda.PROBABILIDAD_BAJA);
+	    else if(contador <= 2*total/3.0)
+		c.setTipo(TipoCelda.PROBABILIDAD_MEDIA);
+	    else
+		c.setTipo(TipoCelda.PROBABILIDAD_ALTA);
+	    contador++;
+	}
+    }
+
+    /**
+     * Corre el algoritmo de localización de Markov.
+     * @param sigmaSquared - Varianza de la distribución normal.
+     * @param sigmaTheta - Ruido del sensor de giro.
+     * @param s - Porcentaje de ruido de la lectura del odómetro.
+     */
+    public void markov(double sigmaSquared, double sigmaTheta, double s){
 	/* Tercera parte.
 	   Correr el algoritmo indefinidamente */
-	while(true){
-	    /* Decidir si se mueve el Robot */
-	    decideMovimiento();
-	    boolean movimiento = giro || desplazamiento; /* Nos dice si el 
-							    Robot se movió */
-	    if(!movimiento){ /* No se movió el Robot */
-		aT = 0.0;
-		for(int direccion = Celda.N, direccion < Celda.NO; 
+	/* Decidir si se mueve el Robot */
+	decideMovimiento();
+	boolean movimiento = giro || desplazamiento; /* Nos dice si el 
+							Robot se movió */
+	if(!movimiento){/* No se movió el Robot */
+	    aT = 0.0;
+	    for(int direccion = Celda.N; direccion < Celda.NO; 
+		++direccion){ /* Para todas las direcciones posibles */
+		
+
+		/* Iteramos sobre las posiciones */
+		for(int i = 0; i < mundo.getAncho(); ++i){
+		    for(int j = 0; j < mundo.getAlto(); ++j){
+			Celda cuadro = mundo.getPosicion(i, j); /* La 
+								   Celda 
+								   actual 
+								*/
+			if(cuadro.getTipo() != TipoCelda.OBSTACULO){
+			    double distanciaObstaculo = cuadro.getDistanciaObstaculo(direccion); 
+			    double p; /* P(sT | l) */
+			    p = Math.sqrt(1.0/2*Math.PI*sigmaSquared);
+			    p *= Math.exp((-1.0)*Math.pow(sT - distanciaObstaculo, 2.0)/(2.0*sigmaSquared));
+			    cuadro.setCreencia(cuadro.getCreencia() * p);
+			    mundo.setPosicion(cuadro, i, j);
+			}
+		    }
+		}
+	    }
+	    /* Ahora se normaliza la creencia */
+	    normaliza();
+	    cambiaTipos();
+	}else{ /* Segundo caso: Se movió el Robot */
+	    if(giro){ /* El Robot giró */
+		double sumaProbas = 0.0;
+		for(int direccion = Celda.N; direccion < Celda.NO; 
 		    ++direccion){ /* Para todas las direcciones posibles */
-		    
-		    /* Distancia del Robot al siguiente obstáculo*/
-		    double distanciaObstaculo = celda.getDistanciaObstaculo(direccion); 
+		    	    double p; /* P(l|l', θT) */
+			    p = (1.0) / ((2.0) * Math.PI * sigmaTheta);
+				p *= Math.exp(Math.pow(((45*direccion - 
+		 					 theta) - thetaT) / 
+						       sigmaTheta, 2));
+				sumaProbas += p;
+		}
+		/* Iteramos sobre las posiciones */
+		for(int i = 0; i < mundo.getAncho(); ++i){
+		    for(int j = 0; j < mundo.getAlto(); ++j){
+			Celda c = mundo.getPosicion(i, j);
+			if(c.getTipo() != TipoCelda.OBSTACULO){
+			    c.setCreencia(c.getCreencia()*sumaProbas);
+			    mundo.setPosicion(c, i, j);
+			}
+		    }
+		}
+		normaliza();
+		cambiaTipos();
+	    }else{ /* El Robot se desplazó */
+		double[][] sumaProbas = new double[mundo.getAncho()][mundo.getAlto()]; /* Arreglo donde se pondrá ΣP(l|l', aT) */
+		for(int i = 0; i < mundo.getAncho(); ++i)
+		    for(int j = 0; j < mundo.getAlto(); ++j)
+			sumaProbas[i][j] = 0.0;
+		
+		for(int direccion = Celda.N; direccion < Celda.NO; 
+		    ++direccion){ /* Para todas las direcciones posibles */
 		    /* Iteramos sobre las posiciones */
 		    for(int i = 0; i < mundo.getAncho(); ++i){
 			for(int j = 0; j < mundo.getAlto(); ++j){
-			    Celda cuadro = mundo.getPosicion(i, j); /* La 
-								       Celda 
-								       actual 
-								    */
-			    if(cuadro.getTipo() != TipoCelda.OBSTACULO){
-				double p; /* P(sT | l) */
-				p = Math.sqrt(1.0/2*Math.PI*sigmaSquared);
-				p *= Math.exp((-1.0)*Math.pow(sT - distanciaObstaculo, 2.0)/(2.0*sigmaSquared));
-				cuadro.setCreencia(cuadro.getCreencia() * p);
-				mundo.setPosicion(cuadro, i, j);
+			    if(mundo.getPosicion(i, j).getTipo() != 
+			       TipoCelda.OBSTACULO){
+			    double sigmaX, sigmaY; /* σx, σy */
+			    sigmaX = s * aT * Math.cos(direccion*45);
+			    sigmaY = s * aT * Math.sin(direccion*45);
+			    if(sigmaX == 0 || sigmaY == 0)
+				continue; /* No quiero que se rompa el 
+					     programa */
+			    double p; /* P(l|l', aT) */
+			    p = (1.0) / ((2.0) * Math.PI *sigmaX * sigmaY);
+			    p *= Math.exp((-1.0/2.0)*
+					  (Math.pow((x + aT*Math.cos(direccion*45)-i)/sigmaX, 2.0) + 
+					   Math.pow((y + aT*Math.cos(direccion*45)-j)/sigmaY, 2.0)));
+			    sumaProbas[i][j] += p; 
 			    }
 			}
 		    }
-		}
-		/* Ahora se normaliza la creencia */
-		/* En el pdf decía que para todas las direcciones posibles, pero según yo, eso está mal */
+		} 
 		/* Iteramos sobre las posiciones */
-		for(i = 0; i < mundo.getAncho(); ++i){
-		    for(j = 0; j < mundo.getAlto(); ++j){
-			Celda actual = mundo.getPosicion(i, j); /* La Celda 
-								   actual */
-			if(actual.getTipo() != TipoCelda.OBSTACULO)
-			    aT += cuadro.getCreencia();
-		    }
-		}
-		
-		/* El código ya se volvió un desmadre, pero según yo sigue
-		   bien */
-		/* Iteramos sobre las posiciones */
-		for(i = 0; i < mundo.getAncho(); ++i){
-		    for(j = 0; j < mundo.getAlto(); ++j){
-			Celda actual = mundo.getPosicion(i, j); /* La Celda 
-								   actual */
-			if(actual.getTipo() != TipoCelda.OBSTACULO){
-			    cuadro.setCreencia(cuadro.getCreencia() * 
-					       (1.0/aT));
-			    mundo.setPosicion(actual, i, j);
+		for(int i = 0; i < mundo.getAncho(); ++i){
+		    for(int j = 0; j < mundo.getAlto(); ++j){
+			Celda c = mundo.getPosicion(i, j);
+			if(c.getTipo() != TipoCelda.OBSTACULO){
+			    c.setCreencia(c.getCreencia()*sumaProbas[i][j]);
+			    mundo.setPosicion(c, i, j);
 			}
 		    }
 		}
-
-	    }else{ /* Segundo caso: Se movió el Robot */
-		if(giro){ /* El Robot giró */
-		    double[][] sumaProbas = new double[mundo.getAncho()][mundo.getLargo()]; /* Arreglo donde se pondrá ΣP(l|l', θT) */
-		    for(int direccion = Celda.N, direccion < Celda.NO; 
-			++direccion){ /* Para todas las direcciones posibles */
-			/* Iteramos sobre las posiciones */
-			for(int i = 0; i < mundo.getAncho(); ++i){
-			    for(int j = 0; j < mundo.getLargo(); ++j){
-				double p; /* P(l|l', θT) */
-				p = (1.0) / ((2.0) * Math.PI * sigmaTheta);
-				p *= Math.exp(Math.pow(((45*direccion - 
-							 theta) - thetaT) / 
-						       sigmaTheta, 2));
-				sumaProbas[i][j] += p;
-			    }
-			}
-		    } 
-		    double creenciaRobot = celda.getCreencia(); /* Creencia 
-								   de la 
-								   Celda en 
-								   la que 
-								   está el 
-								   Robot */
-		    /* Iteramos sobre las posiciones */
-		    for(int i = 0; i < mundo.getAncho(); ++i){
-			for(int j = 0; j < mundo.getLargo(); ++j){
-			    Celda c = mundo.getPosicion(i, j);
-			    if(c.getTipo() != TipoCelda.OBSTACULO){
-				c.setCreencia(creenciaRobot*sumaProbas[i][j]);
-				mundo.setPosicion(c, i, j);
-			    }
-			}
-		    }
-		}else{ /* El Robot se desplazó */
-		    double[][] sumaProbas = new double[mundo.getAncho()][mundo.getLargo()]; /* Arreglo donde se pondrá ΣP(l|l', aT) */
-		    for(int direccion = Celda.N, direccion < Celda.NO; 
-			++direccion){ /* Para todas las direcciones posibles */
-			/* Iteramos sobre las posiciones */
-			for(int i = 0; i < mundo.getAncho(); ++i){
-			    for(int j = 0; j < mundo.getLargo(); ++j){
-				double sigmaX, sigmaY; /* σx, σy */
-				sigmaX = s * aT * Math.cos(direccion*45);
-				sigmaY = s * aT * Math.sin(direccion*45);
-				double p; /* P(l|l', aT) */
-				p = (1.0) / ((2.0) * Math.PI *sigmaX * sigmaY);
-				p *= Math.exp((-1.0/2.0)*
-					      (Math.pow((x + aT*Math.cos(direccion*45)-i)/sigmaX, 2.0) + 
-					       Math.pow((y + aT*Math.cos(direccion*45)-j)/sigmaY, 2.0)));
-				sumaProbas[i][j] += p;
-			    }
-			}
-		    } 
-		    double creenciaRobot = celda.getCreencia(); /* Creencia 
-								   de la 
-								   Celda en 
-								   la que 
-								   está el 
-								   Robot */
-		    /* Iteramos sobre las posiciones */
-		    for(int i = 0; i < mundo.getAncho(); ++i){
-			for(int j = 0; j < mundo.getLargo(); ++j){
-			    Celda c = mundo.getPosicion(i, j);
-			    if(c.getTipo() != TipoCelda.OBSTACULO){
-				c.setCreencia(creenciaRobot*sumaProbas[i][j]);
-				mundo.setPosicion(c, i, j);
-			    }
-			}
-		    }
-		}
+		normaliza();
+		cambiaTipos();
 	    }
 	}
     }
@@ -349,5 +359,15 @@ public class Robot{
 	celda = adyacente;
 	aT = 14.0; /* Actualiza el sensor odométrico */
 	return true;
-    }    
+    }
+
+    /* Regresa coordenada en X del Robot */
+    public int getX(){
+	return this.x;
+    }
+
+    /* Regresa coordenada en Y del Robot */
+    public int getY(){
+	return this.y;
+    }
 }
