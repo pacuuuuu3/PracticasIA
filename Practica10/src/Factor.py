@@ -88,6 +88,41 @@ class Factor:
                     break # Para no terminar sin sentido el loop
         return Factor(valores_nuevos)
 
+# Nos dice si una cadena es un numero
+# Basado en codigo de http://stackoverflow.com/questions/354038/how-do-i-check-if-a-string-is-a-number-float-in-python
+# s - La cadena que queremos ver si es numero
+def es_numero(s):
+    try:
+        int(s)
+        return True
+    except ValueError:
+        return False
+        
+
+# Regresa un Factor parseado de una cadena
+# s - La cadena por parsear. Es de la forma '{P(C = 0 | A = 0) = 0,2}' o 
+# similar.
+def factor_from_string(s):
+    l = [] # La lista de variables
+    s = s[3:] # Se quita el {P(
+    i = 2 # Contador
+    for caracter in s:
+        i += 1
+        if(caracter == ')'):
+            break
+        if caracter.isalpha():
+            nombre = caracter # El nombre de la siguiente variable
+        if es_numero(caracter):
+            l.append(Variable(nombre, caracter))
+    print(s)        
+    s = s[i+1:-1] # Sacamos el numero
+    s2 = s.replace(",", ".") # Cambiamos la ',' por '.' para parsear
+    proba = float(s2) # Probabilidad de la lista de variables
+    variables = frozenset(l) # Lista de variables del factor
+    d = {} # Diccionario de variables del factor
+    d[variables] = proba
+    return Factor(d)
+
 # Prueba de multiplicacion
 a0 = Variable('A', 0)
 a1 = Variable('A', 1)
@@ -121,3 +156,7 @@ print(f5)
 # Prueba de marginalizacion
 f6 = f4.marginaliza('B')
 print(f6)
+
+# Prueba del parser
+l = factor_from_string("{P(C = 0 | A = 0) = 0,2}")
+print(l)
